@@ -2,7 +2,7 @@
 
 A floating analog clock with current outside temperature. Forked from [ericlink/widgie-clock-mac](https://github.com/ericlink/widgie-clock-mac) and extended for Windows.
 
-It stays above normal windows. Click-through is on by default so you can work through it. Unlock it from the tray / menu bar when you want to drag it.
+It stays above normal windows. Drag the clock to move it. Use the tray / menu bar if you want click-through instead.
 
 Temperature comes from [Open-Meteo](https://open-meteo.com/) (no API key). Location is inferred from public IP via [ipwho.is](https://ipwho.is/). Weather refreshes every 5 minutes.
 

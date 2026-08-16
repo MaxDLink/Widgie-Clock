@@ -1,14 +1,19 @@
-const { app, BrowserWindow, Tray, Menu, screen, nativeImage } = require('electron');
+const { app, BrowserWindow, Tray, Menu, screen, nativeImage, ipcMain } = require('electron');
 const fs = require('fs');
 const path = require('path');
+
+app.disableHardwareAcceleration();
+app.commandLine.appendSwitch('enable-transparent-visuals');
 
 const WIDTH = 148;
 const HEIGHT = 186;
 const WEATHER_MS = 5 * 60 * 1000;
+const SETTINGS_VERSION = 2;
 const SETTINGS_DEFAULTS = {
-  locked: true,
+  locked: false,
   useFahrenheit: true,
   openAtLogin: false,
+  settingsVersion: SETTINGS_VERSION,
   x: null,
   y: null,
 };
@@ -26,6 +31,11 @@ function settingsPath() {
 function loadSettings() {
   try {
     settings = { ...SETTINGS_DEFAULTS, ...JSON.parse(fs.readFileSync(settingsPath(), 'utf8')) };
+    if ((settings.settingsVersion || 1) < SETTINGS_VERSION) {
+      settings.locked = false;
+      settings.settingsVersion = SETTINGS_VERSION;
+      saveSettings();
+    }
   } catch {
     settings = { ...SETTINGS_DEFAULTS };
   }
@@ -105,17 +115,16 @@ function createWindow() {
     x: pos.x,
     y: pos.y,
     frame: false,
-    transparent: false,
+    transparent: true,
     alwaysOnTop: true,
     skipTaskbar: true,
     resizable: false,
     maximizable: false,
     minimizable: false,
     fullscreenable: false,
-    hasShadow: true,
-    roundedCorners: true,
+    hasShadow: false,
     thickFrame: false,
-    backgroundColor: '#161616',
+    backgroundColor: '#00000000',
     show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -124,6 +133,7 @@ function createWindow() {
     },
   });
 
+  win.setBackgroundColor('#00000000');
   win.setAlwaysOnTop(true, 'screen-saver');
   win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
@@ -245,7 +255,27 @@ function startWeatherLoop() {
   weatherTimer = setInterval(refreshWeather, WEATHER_MS);
 }
 
-app.commandLine.appendSwitch('enable-transparent-visuals');
+let dragOffset = null;
+
+ipcMain.on('drag-start', (_event, point) => {
+  if (!win || win.isDestroyed() || settings.locked) return;
+  const [wx, wy] = win.getPosition();
+  dragOffset = { x: point.x - wx, y: point.y - wy };
+});
+
+ipcMain.on('drag-move', (_event, point) => {
+  if (!win || win.isDestroyed() || !dragOffset) return;
+  win.setPosition(Math.round(point.x - dragOffset.x), Math.round(point.y - dragOffset.y));
+});
+
+ipcMain.on('drag-end', () => {
+  dragOffset = null;
+  if (!win || win.isDestroyed()) return;
+  const [x, y] = win.getPosition();
+  settings.x = x;
+  settings.y = y;
+  saveSettings();
+});
 
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) {
@@ -261,9 +291,12 @@ if (!gotLock) {
     app.setName('Widgie Clock');
     loadSettings();
     app.setLoginItemSettings({ openAtLogin: Boolean(settings.openAtLogin) });
-    createWindow();
-    rebuildTray();
-    startWeatherLoop();
+    // Transparent windows on Windows paint more reliably after a brief delay.
+    setTimeout(() => {
+      createWindow();
+      rebuildTray();
+      startWeatherLoop();
+    }, 50);
   });
 }
 

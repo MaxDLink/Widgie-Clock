@@ -53,6 +53,28 @@ function applyState(state) {
   }
 }
 
+widget.addEventListener('pointerdown', (event) => {
+  if (event.button !== 0 || widget.classList.contains('locked')) return;
+  if (!window.widgie || typeof window.widgie.dragStart !== 'function') return;
+  widget.setPointerCapture(event.pointerId);
+  window.widgie.dragStart(event.screenX, event.screenY);
+});
+
+widget.addEventListener('pointermove', (event) => {
+  if (!event.buttons || widget.classList.contains('locked')) return;
+  if (!window.widgie || typeof window.widgie.dragMove !== 'function') return;
+  window.widgie.dragMove(event.screenX, event.screenY);
+});
+
+function endDrag() {
+  if (window.widgie && typeof window.widgie.dragEnd === 'function') {
+    window.widgie.dragEnd();
+  }
+}
+
+widget.addEventListener('pointerup', endDrag);
+widget.addEventListener('pointercancel', endDrag);
+
 buildTicks();
 tick();
 
