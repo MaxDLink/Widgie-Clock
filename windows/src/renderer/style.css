@@ -1,0 +1,174 @@
+html,
+body {
+  margin: 0;
+  width: 148px;
+  height: 186px;
+  overflow: hidden;
+  background: #161616;
+  user-select: none;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+.widget {
+  box-sizing: border-box;
+  width: 148px;
+  height: 186px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 6px;
+  background: #161616;
+  -webkit-app-region: drag;
+}
+
+.widget.locked {
+  -webkit-app-region: no-drag;
+}
+
+.clock {
+  position: relative;
+  width: 130px;
+  height: 130px;
+}
+
+.rim {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgb(17, 17, 17);
+  box-shadow: 0 0 0 0.75px rgba(255, 255, 255, 0.2);
+}
+
+.face {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, rgb(247, 242, 232) 0%, rgb(217, 207, 190) 100%);
+}
+
+.ticks {
+  position: absolute;
+  inset: 0;
+}
+
+.tick {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1px;
+  height: 3px;
+  margin-left: -0.5px;
+  margin-top: -1.5px;
+  background: #000;
+  transform-origin: center center;
+}
+
+.tick.hour-tick {
+  width: 2px;
+  height: 7px;
+  margin-left: -1px;
+  margin-top: -3.5px;
+  background: #111;
+}
+
+.num {
+  position: absolute;
+  color: #000;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.n12 {
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.n6 {
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.n3 {
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.n9 {
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.hand {
+  position: absolute;
+  left: 50%;
+  background: #000;
+  border-radius: 999px;
+  transform-origin: 50% 100%;
+}
+
+.hand.hour {
+  width: 7px;
+  height: 37px;
+  margin-left: -3.5px;
+  bottom: 50%;
+}
+
+.hand.minute {
+  width: 4px;
+  height: 47px;
+  margin-left: -2px;
+  bottom: 50%;
+}
+
+.hand.second {
+  width: 1.5px;
+  height: 61px;
+  margin-left: -0.75px;
+  bottom: calc(50% - 13px);
+  transform-origin: 50% calc(100% - 13px);
+}
+
+.pin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  background: #000;
+  border-radius: 50%;
+}
+
+.pin-inner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 3px;
+  height: 3px;
+  margin: -1.5px 0 0 -1.5px;
+  background: rgb(51, 51, 51);
+  border-radius: 50%;
+}
+
+.status {
+  margin-top: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.sep {
+  margin: 0 4px;
+  opacity: 0.75;
+}

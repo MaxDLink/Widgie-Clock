@@ -9,19 +9,31 @@ final class AppModel: ObservableObject {
         static let left = "left"
         static let bottom = "bottom"
         static let hasPosition = "hasPosition"
+        static let useFahrenheit = "useFahrenheit"
     }
+
+    static let weatherRefreshNanoseconds: UInt64 = 5 * 60 * 1_000_000_000
 
     @Published private(set) var isLocked: Bool
     @Published private(set) var startsAtLogin: Bool
+    @Published private(set) var useFahrenheit: Bool
+    @Published private(set) var temperatureText = "—"
+    @Published private(set) var cityName = ""
 
     private let defaults: UserDefaults
     private weak var panel: NSPanel?
+    private var weatherTask: Task<Void, Never>?
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        defaults.register(defaults: [Key.locked: true])
+        defaults.register(defaults: [
+            Key.locked: true,
+            Key.useFahrenheit: true,
+        ])
         isLocked = defaults.bool(forKey: Key.locked)
+        useFahrenheit = defaults.bool(forKey: Key.useFahrenheit)
         startsAtLogin = SMAppService.mainApp.status == .enabled
+        startWeatherLoop()
     }
 
     var lockMenuTitle: String {
@@ -53,12 +65,44 @@ final class AppModel: ObservableObject {
         startsAtLogin = SMAppService.mainApp.status == .enabled
     }
 
-    func savedOrigin(size: CGFloat) -> CGPoint {
+    var unitsMenuTitle: String {
+        useFahrenheit ? "Switch to Celsius" : "Switch to Fahrenheit"
+    }
+
+    func toggleUnits() {
+        useFahrenheit.toggle()
+        defaults.set(useFahrenheit, forKey: Key.useFahrenheit)
+        Task { await refreshWeather() }
+    }
+
+    func savedOrigin(width: CGFloat, height: CGFloat) -> CGPoint {
         guard defaults.bool(forKey: Key.hasPosition) else {
             let frame = NSScreen.main?.visibleFrame ?? .zero
-            return CGPoint(x: frame.maxX - size - 24, y: frame.maxY - size - 24)
+            return CGPoint(x: frame.maxX - width - 24, y: frame.maxY - height - 24)
         }
         return CGPoint(x: defaults.double(forKey: Key.left), y: defaults.double(forKey: Key.bottom))
+    }
+
+    func startWeatherLoop() {
+        weatherTask?.cancel()
+        weatherTask = Task { [weak self] in
+            while let self, !Task.isCancelled {
+                await self.refreshWeather()
+                try? await Task.sleep(nanoseconds: Self.weatherRefreshNanoseconds)
+            }
+        }
+    }
+
+    func refreshWeather() async {
+        do {
+            let snapshot = try await WeatherService.fetch(useFahrenheit: useFahrenheit)
+            temperatureText = "\(Int(snapshot.temperature.rounded()))°"
+            cityName = snapshot.city
+        } catch {
+            if temperatureText == "—" {
+                temperatureText = "—"
+            }
+        }
     }
 
     func savePosition() {

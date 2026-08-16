@@ -8,9 +8,10 @@ final class ClockPanelController: NSObject, NSWindowDelegate {
 
     init(model: AppModel) {
         self.model = model
-        let size: CGFloat = 130
+        let width: CGFloat = 130
+        let height: CGFloat = 172
         panel = NSPanel(
-            contentRect: NSRect(origin: model.savedOrigin(size: size), size: NSSize(width: size, height: size)),
+            contentRect: NSRect(origin: model.savedOrigin(width: width, height: height), size: NSSize(width: width, height: height)),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -18,7 +19,7 @@ final class ClockPanelController: NSObject, NSWindowDelegate {
         super.init()
 
         panel.delegate = self
-        panel.contentView = NSHostingView(rootView: ClockFaceView())
+        panel.contentView = NSHostingView(rootView: ClockFaceView().environmentObject(model))
         panel.backgroundColor = .clear
         panel.isOpaque = false
         panel.hasShadow = true

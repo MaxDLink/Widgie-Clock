@@ -1,11 +1,28 @@
 import SwiftUI
 
 struct ClockFaceView: View {
+    @EnvironmentObject private var model: AppModel
+
     var body: some View {
         TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
             let angles = ClockMath.angles(for: timeline.date)
+            let time = timeline.date.formatted(date: .omitted, time: .shortened)
 
-            ZStack {
+            VStack(spacing: 6) {
+                clockFace(angles: angles)
+                Text("\(time)  ·  \(model.temperatureText)")
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(Color.black.opacity(0.55), in: Capsule())
+            }
+        }
+        .frame(width: 130, height: 172)
+    }
+
+    private func clockFace(angles: HandAngles) -> some View {
+        ZStack {
                 Circle().fill(Color(red: 0.067, green: 0.067, blue: 0.067))
                 Circle().stroke(.white.opacity(0.2), lineWidth: 0.75)
                 Circle()
@@ -32,9 +49,8 @@ struct ClockFaceView: View {
                 Circle().fill(Color(white: 0.2)).frame(width: 3, height: 3)
             }
             .padding(0.5)
-        }
-        .frame(width: 130, height: 130)
-        .drawingGroup()
+            .frame(width: 130, height: 130)
+            .drawingGroup()
     }
 
     private var ticks: some View {

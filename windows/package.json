@@ -1,0 +1,36 @@
+{
+  "name": "widgie-clock",
+  "productName": "Widgie Clock",
+  "version": "1.1.0",
+  "description": "Floating analog clock and outside temperature widget for Windows",
+  "main": "src/main.js",
+  "author": "Max Link",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/clock-math.test.js",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.maxdlink.WidgieClock",
+    "productName": "Widgie Clock",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*"
+    ],
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ],
+      "icon": "assets/icon.png"
+    }
+  }
+}
